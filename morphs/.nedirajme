@@ -1,2 +1,3 @@
 ovo je ovdje samo zato da se "prazan" direktorij doda na git,
+sve slike u ovom direktoriju se ignoriraju za git
 bez dodavanja slika unutra, slike ce se generirati kod vas lokalno
