@@ -44,16 +44,20 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
     # 2) calculate Delaunay triangulation
     triangles_src, triangles_dst = self.find_Delaunay_triangles(pts_src, pts_dst, rect, img_src)
     
+    # 3) 
     output = [] # TODO region cropping and creating images
     
     triangles_morphed = []
     outs = [] # TODO remove debugging
     for i in xrange(0, n_steps):
+      # 3a) add weigthed landmark points
       a = float(i) / (n_steps - 1)
       curr = np.array([(1 - a) * triangle_src + a * triangle_dst for (triangle_src, triangle_dst) in \
         zip(triangles_src, triangles_dst)])
       outs.append(helpers.debug_draw_triangles(curr, rect)) # TODO remove debugging
       triangles_morphed.append(curr)
+    
+    # TODO region cropping and color interpolation
     
     print triangles_morphed[0].shape
     helpers.save_images(outs) # TODO remove debugging
