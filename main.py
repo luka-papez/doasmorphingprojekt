@@ -31,10 +31,8 @@ if __name__ == "__main__":
   # morph the images
   morphs = morphing_algorithm.morph(img_src, img_dst, n_steps = 10)
   
-  # save the morphs to file as jpg files
-  for (i, morph) in enumerate(morphs):
-    # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html?#imwrite
-    cv2.imwrite("morphs/morph" + str(i) + ".jpg", morph)
+  # save the results
+  helpers.save_images(morphs)
   
   # indefinetly wait for keypress
   cv2.waitKey(0)
