@@ -10,6 +10,8 @@ Za pokretanje je potrebno imati instalirano:
       2) potrebno je skinuti detektor lica dlib-a koji ima oko 100 mb
         i staviti ga u data folder. NI SLUCAJNO NE PUSHATI TO NA GIT!!
         dodano je da ga se ignorira u .gitignore ali provjeriti svaki put.	
+        link ovdje (otpakirati, ocekuje se .dat fajl):
+        http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
 
 Preporuka je koristiti Linux (moze u virtualci) jer se OpenCV tamo instalira
 s par naredbi a instalacija dlib-a je doslovno samo "pip install dlib".

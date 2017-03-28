@@ -20,6 +20,6 @@ class SimpleLinearMorpher(MorphingAlgorithm):
   TODO: implement this class
 """
 class AdvancedMorphingAlgorithm(MorphingAlgorithm):
+  # http://www.learnopencv.com/face-morph-using-opencv-cpp-python/
   def morph(self, img_src, img_dst, n_steps = 10):
-    raise NotImplementedError("Please Implement this method")
-
+    pass
