@@ -3,11 +3,11 @@ smece na server.
 
 Za pokretanje je potrebno imati instalirano:
   1) OpenCV verziju barem 3.0.0. (ucitavanje i racunanje sa slikama)
-    1a) sve drugo potrebno za OpenCV je stavljeno vec u data folder jer ima
+    1) sve drugo potrebno za OpenCV je stavljeno vec u data folder jer ima
         samo par kilobajta
   2) dlib (detekcija tocaka lica)
-    2a) za dlib je potreban boost-python, nekad nije instaliran po defaultu
-    2b) potrebno je skinuti detektor lica dlib-a koji ima oko 100 mb
+    1) za dlib je potreban boost-python, nekad nije instaliran po defaultu
+    2) potrebno je skinuti detektor lica dlib-a koji ima oko 100 mb
         i staviti ga u data folder. NI SLUCAJNO NE PUSHATI TO NA GIT!!
         dodano je da ga se ignorira u .gitignore ali provjeriti svaki put.	
 
