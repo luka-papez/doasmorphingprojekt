@@ -27,7 +27,7 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
 
 """
   TODO: write better program description
-  Run with: python morphing.py -s ./images/conan.jpeg -d ./images/governor.jpg 
+  Run with: python morphing.py -s ./images/conan.jpg -d ./images/governor.jpg 
 """
 if __name__ == "__main__":
       

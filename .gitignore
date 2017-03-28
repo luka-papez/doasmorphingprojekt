@@ -1,2 +1,3 @@
 *.pyc
 morphs/*.jpg
+data/*.dat

@@ -1,4 +1,56 @@
 import cv2
+import dlib
+
+"""
+  Find the 68 landmark points of a face in an image.
+  Parts of code from: http://www.codesofinterest.com/2016/10/getting-dlib-face-landmark-detection.html
+  Returns a list of points written as [p.x, p.y].
+"""
+def get_facial_landmarks(img_src):
+  cascade_path = "data/haarcascade_frontalface_default.xml"  
+  predictor_path= "data/shape_predictor_68_face_landmarks.dat"  
+
+  # reate the Haar face detector  
+  face_detector = cv2.CascadeClassifier(cascade_path)  
+ 
+  # create the landmark predictor  
+  landmark_predictor = dlib.shape_predictor(predictor_path)  
+
+  img_gray = cv2.cvtColor(img_src, cv2.COLOR_BGR2GRAY)
+  
+  # detect faces in the image  
+  faces = face_detector.detectMultiScale(  
+      img_gray,  
+      scaleFactor=1.05,  
+      minNeighbors=5,  
+      minSize=(100, 100),  
+      flags=0
+  )
+
+  x, y, w, h = faces[0]
+
+  # converting the OpenCV rectangle coordinates to Dlib rectangle  
+  dlib_rect = dlib.rectangle(int(x), int(y), int(x + w), int(y + h))
+
+  # detect landmarks
+  detected_landmarks = landmark_predictor(img_src, dlib_rect).parts()  # TODO: mozda radi s crno bijelom
+  # convert them to human-manageable form
+  landmarks = [[p.x, p.y] for p in detected_landmarks]
+  
+  """
+  # debugging, draw found points
+  cv2.rectangle(img_src, (x, y), (x + w, y + h), (0, 255, 0), 2)  
+  for (i, point) in enumerate(landmarks):  
+    pos = (point[0], point[1])  
+
+    # draw points on the landmark positions
+    cv2.circle(img_src, pos, 3, color=(0, 255, 255))  
+
+  cv2.imshow('conan', img_src)
+  cv2.waitKey(0)  
+  """
+    
+  return landmarks
 
 """
   Performs linear interpolation between two images, returning 
@@ -17,21 +69,25 @@ def linear_interpolation(img_src, img_dst, n_steps = 10):
   return output
   
 """
-  Returns two images as numpy arrays from given paths.
-  The images are resized to be the same size
+  Returns images as a list of numpy arrays from given paths.
+  The images are resized to be the same size.
 """
-def load_images(path_src, path_dst):
-  print "Loading images from: ", path_src, path_dst
+def load_images(*paths):
+  print "Loading images from: ", paths
+  output = []
 
   # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html?#imread
-  img_src = cv2.imread(path_src)
-  img_dst = cv2.imread(path_dst)
+  for path in paths:
+    output.append(cv2.imread(path))
 
   # resize the images to be the same size
-  new_height, new_width = min(img_src.shape[0], img_dst.shape[0]), min(img_src.shape[1], img_dst.shape[1])
+  def fun(acc, curr):
+    return min(curr.shape[0], acc[0]), min(curr.shape[1], acc[1])
+
+  new_height, new_width = reduce(fun, output, output[0].shape)
   
-  # http://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#resize
-  img_src = cv2.resize(src = img_src, dsize = (new_height, new_width))
-  img_dst = cv2.resize(src = img_dst, dsize = (new_height, new_width))
+  # http://docs.opencv.org/2.4/modules/imgproc/doc/geometric_transformations.html#resize  
+  return map(lambda img: cv2.resize(src = img, dsize = (new_height, new_width)), output)
   
-  return img_src, img_dst
+  
+  
