@@ -33,7 +33,7 @@ def get_facial_landmarks(img_src):
   dlib_rect = dlib.rectangle(int(x), int(y), int(x + w), int(y + h))
 
   # detect landmarks
-  detected_landmarks = landmark_predictor(img_src, dlib_rect).parts()  # TODO: mozda radi s crno bijelom
+  detected_landmarks = landmark_predictor(img_src, dlib_rect).parts()  # TODO: perhaps it's faster on grayscale images?
   # convert them to human-manageable form
   landmarks = [[p.x, p.y] for p in detected_landmarks]
   
@@ -54,9 +54,8 @@ def get_facial_landmarks(img_src):
 
 """
   Performs linear interpolation between two images, returning 
-  @n_steps intermediate images as a list
+  @n_steps intermediate images as a list.
 """
-
 def linear_interpolation(img_src, img_dst, n_steps = 10):
   output = []
   
@@ -70,10 +69,12 @@ def linear_interpolation(img_src, img_dst, n_steps = 10):
   
 """
   Returns images as a list of numpy arrays from given paths.
-  The images are resized to be the same size.
+  The images are resized to be the same size. (to the size of the smallest)
 """
-def load_images(*paths):
-  print "Loading images from: ", paths
+def load_resized_images(*paths):
+  if len(paths) == 0:
+    return None
+
   output = []
 
   # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html?#imread
