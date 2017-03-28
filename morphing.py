@@ -17,6 +17,13 @@ class MorphingAlgorithm(object):
 class SimpleLinearMorpher(MorphingAlgorithm):
   def morph(self, img_src, img_dst, n_steps = 10):
     return helpers.linear_interpolation(img_src, img_dst, n_steps)
+    
+"""
+  TODO: implement this class
+"""
+class AdvancedMorphingAlgorithm(MorphingAlgorithm):
+  def morph(self, img_src, img_dst, n_steps = 10):
+    raise NotImplementedError("Please Implement this method")
 
 """
   TODO: write better program description
