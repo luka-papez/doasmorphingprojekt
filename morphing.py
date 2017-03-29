@@ -42,10 +42,16 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
     pts_dst.extend(extra_points)
     
     # 2) calculate Delaunay triangulation
-    triangles_src, triangles_dst = self.find_Delaunay_triangles(pts_src, pts_dst, rect, img_src)
+    """
+    To circumvent this problem, you can either create triangulation on just one image and use it for the other as well ( see which points are forming the triangle). Or you can take the mean of the two face points and do the triangulation once.
+    """
+    triangles_src, triangles_dst = self.find_Delaunay_triangles(pts_src, pts_dst, rect)
+    # TODO: triangulacija nije jednoznacna, treba pronaci indekse tocaka u triangulaciji i onda poslozit iste indekse da budu
     
     # 3) 
     output = [] # TODO region cropping and creating images
+    
+    print triangles_src[4], triangles_dst[0]
     
     triangles_morphed = []
     outs = [] # TODO remove debugging
@@ -54,12 +60,40 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
       a = float(i) / (n_steps - 1)
       curr = np.array([(1 - a) * triangle_src + a * triangle_dst for (triangle_src, triangle_dst) in \
         zip(triangles_src, triangles_dst)])
-      outs.append(helpers.debug_draw_triangles(curr, rect)) # TODO remove debugging
+        
+      some = 4
+      
+      print "Curr:", curr[some]
+      print "Src: ", triangles_src[some]
+      print "Dst: ", triangles_dst[some]
+      print
+      
+      pt1 = (curr[some][0], curr[some][1])
+      pt2 = (curr[some][2], curr[some][3])
+      pt3 = (curr[some][4], curr[some][5])
+      
+      delaunay_color = (0, 0, 255)
+    
+      img_dbg = np.zeros((rect[3], rect[2], 3))
+      
+
+    
+      outs.append(helpers.debug_draw_triangles(curr, rect, img_dbg)) # TODO remove debugging
+            
+      cv2.line(img_dbg, pt1, pt2, delaunay_color, 1, cv2.LINE_AA, 0)
+      cv2.line(img_dbg, pt2, pt3, delaunay_color, 1, cv2.LINE_AA, 0)
+      cv2.line(img_dbg, pt3, pt1, delaunay_color, 1, cv2.LINE_AA, 0) # TODO pokvari se poredak trokuta
+
+      cv2.putText(img_dbg, str(0), pt1, fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.4, color=(0, 0, 255))  
+
+  
+      cv2.imshow("asd", img_dbg)
+      cv2.waitKey(0)
+
       triangles_morphed.append(curr)
     
     # TODO region cropping and color interpolation
     
-    print triangles_morphed[0].shape
     helpers.save_images(outs) # TODO remove debugging
     
     

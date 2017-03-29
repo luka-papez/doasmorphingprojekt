@@ -22,25 +22,24 @@ def rect_contains(rect, point) :
 
 def debug_draw_triangles(triangles_src, rect, img = None):
   img_src = None
-  print rect
   if img is None:
-    img_src = np.zeros((rect[3], rect[2]))
+    img_src = np.zeros((rect[3], rect[2], 3))
   else:
     img_src = img
     
-  delaunay_color = (255, 0, 255)
+  delaunay_color = (255, 255, 255)
   
   for t in triangles_src :
     pt1 = (t[0], t[1])
     pt2 = (t[2], t[3])
     pt3 = (t[4], t[5])
-    if rect_contains(rect, pt1) and rect_contains(rect, pt2) and rect_contains(rect, pt3) :   
+    if rect_contains(rect, pt1) and rect_contains(rect, pt2) and rect_contains(rect, pt3):   
         cv2.line(img_src, pt1, pt2, delaunay_color, 1, cv2.LINE_AA, 0)
         cv2.line(img_src, pt2, pt3, delaunay_color, 1, cv2.LINE_AA, 0)
         cv2.line(img_src, pt3, pt1, delaunay_color, 1, cv2.LINE_AA, 0)
     
-  cv2.imshow("rez", img_src)
-  cv2.waitKey(0)
+  #cv2.imshow("rez", img_src)
+  #cv2.waitKey(0)
   
   return img_src
 
