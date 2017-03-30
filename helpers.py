@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import dlib
 
+# save the morphs to file as jpg files
 def save_images(images):
-  # save the morphs to file as jpg files
   for (i, img) in enumerate(images):
     # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html?#imwrite
     cv2.imwrite("morphs/output" + str(i) + ".jpg", img)
@@ -20,28 +20,34 @@ def rect_contains(rect, point) :
         return False
     return True
 
-def debug_draw_triangles(triangles_src, rect, img = None):
-  img_src = None
-  if img is None:
-    img_src = np.zeros((rect[3], rect[2], 3))
-  else:
-    img_src = img
-    
-  delaunay_color = (255, 255, 255)
+# draw the triangulation    
+def debug_triangles(triangles, rect):
   
-  for t in triangles_src :
+  img_dbg = np.zeros((rect[3], rect[2], 3))
+  triangle_color = (255, 255, 255)
+  highlight_color = (0, 0, 255)
+
+  for t in triangles:
     pt1 = (t[0], t[1])
     pt2 = (t[2], t[3])
     pt3 = (t[4], t[5])
-    if rect_contains(rect, pt1) and rect_contains(rect, pt2) and rect_contains(rect, pt3):   
-        cv2.line(img_src, pt1, pt2, delaunay_color, 1, cv2.LINE_AA, 0)
-        cv2.line(img_src, pt2, pt3, delaunay_color, 1, cv2.LINE_AA, 0)
-        cv2.line(img_src, pt3, pt1, delaunay_color, 1, cv2.LINE_AA, 0)
-    
-  #cv2.imshow("rez", img_src)
-  #cv2.waitKey(0)
   
-  return img_src
+    cv2.line(img_dbg, pt1, pt2, triangle_color, 1, cv2.LINE_AA, 0)
+    cv2.line(img_dbg, pt2, pt3, triangle_color, 1, cv2.LINE_AA, 0)
+    cv2.line(img_dbg, pt3, pt1, triangle_color, 1, cv2.LINE_AA, 0)
+
+  highlighted = [0, 1, 5, 10, 15, 20]
+  for t in highlighted:
+    pt1 = (triangles[t][0], triangles[t][1])
+    pt2 = (triangles[t][2], triangles[t][3])
+    pt3 = (triangles[t][4], triangles[t][5])      
+
+    cv2.line(img_dbg, pt1, pt2, highlight_color, 1, cv2.LINE_AA, 0)
+    cv2.line(img_dbg, pt2, pt3, highlight_color, 1, cv2.LINE_AA, 0)
+    cv2.line(img_dbg, pt3, pt1, highlight_color, 1, cv2.LINE_AA, 0)
+
+  cv2.imshow("Current", img_dbg)
+  cv2.waitKey(0)  
 
 """
   Find the 68 landmark points of a face in an image.
