@@ -32,6 +32,9 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
 
     height, width = img_src.shape[:-1]
     rect = (0, 0, width, height)
+    
+    print rect
+    print
       
     # 1) find corresponding points
     pts_src = helpers.find_facial_landmarks(img_src)
@@ -47,6 +50,22 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
     """
     triangles_src, triangles_dst = self.find_Delaunay_triangles(pts_src, pts_dst, rect)
     # TODO: triangulacija nije jednoznacna, treba pronaci indekse tocaka u triangulaciji i onda poslozit iste indekse da budu
+    
+    print pts_src
+    print
+    
+    
+    np.clip(triangles_src, 0, height - 1, out=triangles_src)
+    
+    print triangles_src
+    
+    # TODO: neki trokutovi su totalno glupi, detektirati te!!
+    
+    for (ind, t) in enumerate(triangles_src):
+      i1 = pts_src.index((t[0], t[1]))
+      i2 = pts_src.index((t[2], t[3]))
+      i3 = pts_src.index((t[4], t[5]))
+      triangles_dst[ind] = [pts_dst[i1][0], pts_dst[i1][1], pts_dst[i2][0], pts_dst[i2][1], pts_dst[i3][0], pts_dst[i3][1]]
     
     # 3) 
     output = [] # TODO region cropping and creating images
@@ -93,6 +112,9 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
       triangles_morphed.append(curr)
     
     # TODO region cropping and color interpolation
+    
+    # i, = np.where( a==value )
+    #idx = list(classes).index(var)
     
     helpers.save_images(outs) # TODO remove debugging
     
