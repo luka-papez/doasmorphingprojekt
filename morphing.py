@@ -126,7 +126,7 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
       cv2.waitKey(0)
       """
     
-    helpers.save_images(output)
+    return output
 
 
   
