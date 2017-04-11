@@ -18,7 +18,18 @@ class MorphingAlgorithm(object):
 class SimpleLinearMorpher(MorphingAlgorithm):
   def morph(self, img_src, img_dst, n_steps = 10):
     from helpers import linear_interpolation
-    return linear_interpolation(img_src, img_dst, n_steps)
+    output = linear_interpolation(img_src, img_dst, n_steps)
+    
+    for i in xrange(0, n_steps):
+      a = float(i) / (n_steps - 1)
+            
+      print "Morphing", a * 100, "% done."
+      
+      cv2.imshow("current", output[i])
+      cv2.waitKey(0)
+      
+    helpers.save_images(output)
+    return output
 
 def list_to_triangle(t):
   return np.array([(t[0], t[1]), (t[2], t[3]), (t[4], t[5])], dtype=np.float32)
@@ -121,11 +132,11 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
       
       print "Morphing", a * 100, "% done."
       
-      """    
+          
       cv2.imshow("mask", img_dbg)
       cv2.waitKey(0)
-      """
-    
+      
+    helpers.save_images(output)
     return output
 
 
