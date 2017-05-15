@@ -35,5 +35,5 @@ if __name__ == "__main__":
   helpers.save_images(morphs)
   
   # indefinetly wait for keypress
-  #cv2.waitKey(0)
+  cv2.waitKey(0)
   
