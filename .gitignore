@@ -1,3 +1,4 @@
 *.pyc
 morphs/*.jpg
 data/*.dat
+.idea

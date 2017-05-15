@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import dlib
+import math
 
 # save the morphs to file as jpg files
 def save_images(images):
@@ -104,6 +105,12 @@ def find_facial_landmarks(img_src):
     
   return landmarks
 
+
+def speedUpMorph(alfa, k = 1.0):
+
+  return math.pow(alfa, (1.0/k))
+
+
 """
   Performs linear interpolation between two images, returning 
   @n_steps intermediate images as a list.
@@ -115,6 +122,11 @@ def linear_interpolation(img_src, img_dst, n_steps = 10):
   for i in xrange(0, n_steps):
     # http://docs.opencv.org/2.4/modules/core/doc/operations_on_arrays.html#addweighted
     a = float(i) / (n_steps - 1)
+
+    speedFactor = 1.2
+
+    a = speedUpMorph(a, speedFactor) # speeds up initial morphing
+
     curr = cv2.addWeighted(img_src, 1 - a, img_dst, a, 0)
     output.append(curr)
     
