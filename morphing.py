@@ -34,9 +34,61 @@ class SimpleLinearMorpher(MorphingAlgorithm):
 def list_to_triangle(t):
   return np.array([(t[0], t[1]), (t[2], t[3]), (t[4], t[5])], dtype=np.float32)
 
-"""
-  TODO: implement this class
-"""
+def apply_affine_transform(src, srcTri, dstTri, size) :
+    
+    # Given a pair of triangles, find the affine transform.
+    warpMat = cv2.getAffineTransform( np.float32(srcTri), np.float32(dstTri) )
+    
+    # Apply the Affine Transform just found to the src image
+    dst = cv2.warpAffine(src, warpMat, (size[0], size[1]), None, flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT_101)
+
+    return dst
+
+
+# Warps and alpha blends triangular regions from img1 and img2 to img
+# https://github.com/spmallick/learnopencv/blob/master/FaceMorph/faceMorph.py
+def morph_triangle(img1, img2, img, t1, t2, t, alpha):
+
+    # Find bounding rectangle for each triangle
+    r1 = cv2.boundingRect(np.float32(t1))
+    r2 = cv2.boundingRect(np.float32(t2))
+    r = cv2.boundingRect(np.float32(t))
+
+    # Offset points by left top corner of the respective rectangles
+    t1Rect = []
+    t2Rect = []
+    tRect = []
+
+    for i in xrange(0, 3):
+        tRect.append(((t[i][0] - r[0]),(t[i][1] - r[1])))
+        t1Rect.append(((t1[i][0] - r1[0]),(t1[i][1] - r1[1])))
+        t2Rect.append(((t2[i][0] - r2[0]),(t2[i][1] - r2[1])))
+
+    # Get mask by filling triangle
+    mask = np.zeros((r[3], r[2], 3), dtype = np.float32)
+    cv2.fillConvexPoly(mask, np.int32(tRect), (1.0, 1.0, 1.0), 16, 0);
+
+    # Apply warpImage to small rectangular patches
+    img1Rect = img1[r1[1]:r1[1] + r1[3], r1[0]:r1[0] + r1[2]]
+    img2Rect = img2[r2[1]:r2[1] + r2[3], r2[0]:r2[0] + r2[2]]
+
+    size = (r[2], r[3])
+    warpImage1 = apply_affine_transform(img1Rect, t1Rect, tRect, size)
+    warpImage2 = apply_affine_transform(img2Rect, t2Rect, tRect, size)
+
+    # Alpha blend rectangular patches
+    imgRect = (1.0 - alpha) * warpImage1 + alpha * warpImage2
+
+    # Copy triangular region of the rectangular patch to the output image
+    img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * ( 1 - mask ) + imgRect * mask
+
+def nothing(x):
+    pass
+
+CURRENT_MORPH_WIN_NAME = "Current morph"
+CURRENT_MORPH_SLIDER_NAME = "Intensity"
+MORPH_LEVELS = 100.0
+
 class AdvancedMorphingAlgorithm(MorphingAlgorithm):
   # http://www.learnopencv.com/face-morph-using-opencv-cpp-python/
   def morph(self, img_src, img_dst, n_steps = 10):
@@ -45,6 +97,9 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
 
     height, width = img_src.shape[:-1]
     rect = (0, 0, width, height)
+    
+    # for sliders and such
+    cv2.namedWindow(CURRENT_MORPH_WIN_NAME)
     
     """
     # 1) find corresponding points
@@ -84,60 +139,41 @@ class AdvancedMorphingAlgorithm(MorphingAlgorithm):
     
     triangles_dst = np.array(triangles_dst, dtype = np.float32)
     
-    """
     # 3) calculate the intermediate morphing steps of the triangles
-    """
     triangles_morphed = []
     white = (255, 255, 255)
     output = []
+    """
     for i in xrange(0, n_steps):
-      # 3a) add weigthed landmark points
-      a = float(i) / (n_steps - 1)
-      curr = np.array([(1 - a) * triangle_src + a * triangle_dst for (triangle_src, triangle_dst) in \
+      # 3a) add weighted landmark points
+      alpha = float(i) / (n_steps - 1)
+    """
+    alpha = cv2.getTrackbarPos(CURRENT_MORPH_SLIDER_NAME, CURRENT_MORPH_WIN_NAME) / MORPH_LEVELS
+    while(True):
+      cv2.createTrackbar(CURRENT_MORPH_SLIDER_NAME, CURRENT_MORPH_WIN_NAME, 0, int(MORPH_LEVELS), nothing)
+      cv2.setTrackbarPos(CURRENT_MORPH_SLIDER_NAME, CURRENT_MORPH_WIN_NAME, int(alpha * MORPH_LEVELS))
+      
+      curr = np.array([(1 - alpha) * triangle_src + alpha * triangle_dst for (triangle_src, triangle_dst) in \
         zip(triangles_src, triangles_dst)])
 
       triangles_morphed.append(curr)
 
-      # helpers.debug_triangles(curr, rect)
-      
       # 3b) add weighted regions
-      # TODO: this part is really really slow, integers should be used for images instead of floats for speed
-      # TODO: figure out how to use integers
-      img_dbg = np.zeros(shape = img_src.shape, dtype = img_src.dtype)
-      for (ts, tc, td) in zip(triangles_src, curr, triangles_dst):
-        # http://docs.opencv.org/2.4/modules/core/doc/drawing_functions.html#fillconvexpoly
-        triangle_cur = list_to_triangle(tc)
-        triangle_src = list_to_triangle(ts)
-        triangle_dst = list_to_triangle(td)
-        
-        img_mask_src = np.zeros(img_src.shape, dtype=np.uint8)
-        img_mask_dst = np.zeros(img_src.shape, dtype=np.uint8)
-        
-        cv2.fillConvexPoly(img_mask_src, np.array(triangle_src, dtype = np.int32), white)
-        cv2.fillConvexPoly(img_mask_dst, np.array(triangle_dst, dtype = np.int32), white)
-        
-        # TODO: fix seams when blending, using integers will probably fix that
-        img_masked_src = cv2.bitwise_and(img_src, img_mask_src)
-        img_masked_dst = cv2.bitwise_and(img_dst, img_mask_dst)
-        
-        mat_src_cur = cv2.getAffineTransform(triangle_src, triangle_cur)
-        mat_dst_cur = cv2.getAffineTransform(triangle_dst, triangle_cur)
-        
-        img_dbg = img_dbg + cv2.addWeighted(
-          cv2.warpAffine(img_masked_src, mat_src_cur, (width, height)), 1 - a,
-          cv2.warpAffine(img_masked_dst, mat_dst_cur, (width, height)), a, 0
-          )                
-          
+
+      # Allocate space for final output
+      img_dbg = np.zeros(img_src.shape, dtype = img_src.dtype)
+
+      for j in xrange(0, len(triangles_src)):
+        morph_triangle(img_src, img_dst, img_dbg, list_to_triangle(triangles_src[j]), list_to_triangle(triangles_dst[j]), list_to_triangle(curr[j].ravel()), alpha)
+      
       output.append(img_dbg)
       
-      print "Morphing", a * 100, "% done."
-      
-          
-      cv2.imshow("mask", img_dbg)
-      cv2.waitKey(0)
+      cv2.imshow(CURRENT_MORPH_WIN_NAME, img_dbg)
+      cv2.waitKey(5)
+      """"""
+      alpha = cv2.getTrackbarPos(CURRENT_MORPH_SLIDER_NAME, CURRENT_MORPH_WIN_NAME) / MORPH_LEVELS
       
     helpers.save_images(output)
     return output
-
 
   
