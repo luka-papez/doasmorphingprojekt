@@ -5,6 +5,9 @@ import math
 
 # save the morphs to file as jpg files
 def save_images(images):
+  if images is None:
+    return
+    
   for (i, img) in enumerate(images):
     # http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html?#imwrite
     cv2.imwrite("morphs/output" + str(i) + ".jpg", img)
@@ -77,7 +80,6 @@ def find_facial_landmarks(img_src):
   )
 
   if len(faces) == 0:
-    print "No faces found!!"
     return None
 
   x, y, w, h = faces[0]
@@ -107,7 +109,6 @@ def find_facial_landmarks(img_src):
 
 
 def speedUpMorph(alfa, k = 1.0):
-
   return math.pow(alfa, (1.0/k))
 
 
@@ -122,10 +123,6 @@ def linear_interpolation(img_src, img_dst, n_steps = 10):
   for i in xrange(0, n_steps):
     # http://docs.opencv.org/2.4/modules/core/doc/operations_on_arrays.html#addweighted
     a = float(i) / (n_steps - 1)
-
-    speedFactor = 1.2
-
-    a = speedUpMorph(a, speedFactor) # speeds up initial morphing
 
     curr = cv2.addWeighted(img_src, 1 - a, img_dst, a, 0)
     output.append(curr)
