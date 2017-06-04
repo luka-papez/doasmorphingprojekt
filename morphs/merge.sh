@@ -1,3 +1,3 @@
 #!/bin/bash
-montage -mode concatenate -tile 4x output*.jpg merged.jpg
+montage -mode concatenate -tile 5x2 output*.jpg merged.jpg
 

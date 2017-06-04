@@ -21,7 +21,7 @@ class MorphingAlgorithm(object):
     output = []
 
     if n_steps != 0:
-      speedFactor = 1.2
+      speedFactor = 1.7
       for i in xrange(0, n_steps):
         # 3a) add weighted landmark points
         alpha = helpers.speedUpMorph(float(i) / (n_steps - 1), speedFactor)
