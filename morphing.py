@@ -2,15 +2,16 @@ import numpy as np
 import helpers
 import cv2
 
+
+CURRENT_MORPH_WIN_NAME = "Current morph"
+CURRENT_MORPH_SLIDER_NAME = "Intensity"
+MORPH_LEVELS = 100.0
+
 """
   Abstract morphing algorithm class. Each deriving class should implement the
   @morph method, taking two images and number of steps and returning 
   a list of @n_steps images with increasing morphing.
 """
-CURRENT_MORPH_WIN_NAME = "Current morph"
-CURRENT_MORPH_SLIDER_NAME = "Intensity"
-MORPH_LEVELS = 100.0
-
 class MorphingAlgorithm(object):
   # morph a single image with desired intensity alpha
   def step(self, alpha):
