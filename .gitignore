@@ -1,5 +1,6 @@
 *.pyc
 morphs/*.jpg
 data/*.dat
+data/*.bz2
 .idea
 images
